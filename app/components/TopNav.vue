@@ -69,6 +69,13 @@
       </a>
     </div>
     <div class="top-nav-item">
+      <a
+        @click="openFloatWindow"
+        class="link link--uppercase">
+        <i class="fa fa-cog"/><span>弹幕</span>
+      </a>
+    </div>
+    <div class="top-nav-item">
       <login/>
     </div>
   </div>

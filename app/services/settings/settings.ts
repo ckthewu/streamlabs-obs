@@ -99,7 +99,7 @@ export class SettingsService extends StatefulService<ISettingsState>
       queryParams: { categoryName },
       size: {
         width: 800,
-        height: 800
+        height: 600
       }
     });
   }

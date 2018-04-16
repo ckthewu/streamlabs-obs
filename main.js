@@ -42,6 +42,7 @@ function log(...args) {
 // Windows
 let mainWindow;
 let childWindow;
+let floatWindow;
 let childWindowIsReadyToShow = false;
 
 // Somewhat annoyingly, this is needed so that the child window
@@ -56,6 +57,7 @@ const indexUrl = 'file://' + __dirname + '/index.html';
 
 function openDevTools() {
   childWindow.webContents.openDevTools({ mode: 'undocked' });
+  floatWindow.webContents.openDevTools({ mode: 'undocked' });
   mainWindow.webContents.openDevTools({ mode: 'undocked' });
 }
 
@@ -152,6 +154,7 @@ function startApp() {
     if (!shutdownStarted) {
       shutdownStarted = true;
       childWindow.destroy();
+      floatWindow.destroy();
       mainWindow.send('shutdown');
 
       // We give the main window 10 seconds to acknowledge a request
@@ -187,16 +190,36 @@ function startApp() {
   // Pre-initialize the child window
   childWindow = new BrowserWindow({
     show: false,
-    frame: false
+    frame: false,
+    transparent: true,
   });
 
+  floatWindow = new BrowserWindow({
+    show: false,
+    frame: false,
+    transparent: true,
+    // focusable: false,
+    alwaysOnTop: true,
+  }); 
+
   childWindow.setMenu(null);
+
+  floatWindow.setMenu(null);
 
   // The child window is never closed, it just hides in the
   // background until it is needed.
   childWindow.on('close', e => {
     if (!shutdownStarted) {
       childWindow.send('closeWindow');
+
+      // Prevent the window from actually closing
+      e.preventDefault();
+    }
+  });
+
+  floatWindow.on('close', e => {
+    if (!shutdownStarted) {
+      floatWindow.send('closeWindow');
 
       // Prevent the window from actually closing
       e.preventDefault();
@@ -230,6 +253,7 @@ function startApp() {
   ipcMain.on('services-ready', () => {
     callService('AppService', 'setArgv', process.argv);
     childWindow.loadURL(indexUrl + '?child=true');
+    floatWindow.loadURL(indexUrl + '?child=true&float=true');
   });
 
   ipcMain.on('window-childWindowIsReadyToShow', () => {
@@ -248,6 +272,7 @@ function startApp() {
 
   ipcMain.on('services-message', (event, payload) => {
     if (!childWindow.isDestroyed()) childWindow.webContents.send('services-message', payload);
+    if (!floatWindow.isDestroyed()) floatWindow.webContents.send('services-message', payload);
   });
 
 
@@ -360,6 +385,60 @@ ipcMain.on('window-showChildWindow', (event, windowOptions) => {
 ipcMain.on('window-closeChildWindow', (event) => {
   // never close the child window, hide it instead
   childWindow.hide();
+});
+
+ipcMain.on('window-showFloatWindow', (event, windowOptions) => {
+  console.log('on window-showFloatWindow')
+  if (windowOptions.size.width && windowOptions.size.height) {
+    // Center the child window on the main window
+
+    // For some unknown reason, electron sometimes gets into a
+    // weird state where this will always fail.  Instead, we
+    // should recover by simply setting the size and forgetting
+    // about the bounds.
+    try {
+      const bounds = mainWindow.getBounds();
+      const childX = (bounds.x + (bounds.width / 2)) - (windowOptions.size.width / 2);
+      const childY = (bounds.y + (bounds.height / 2)) - (windowOptions.size.height / 2);
+
+      floatWindow.restore();
+      floatWindow.setMinimumSize(windowOptions.size.width, windowOptions.size.height);
+      floatWindow.setBounds({
+        x: Math.floor(childX),
+        y: Math.floor(childY),
+        width: windowOptions.size.width,
+        height: windowOptions.size.height
+      });
+    } catch (err) {
+      log('Recovering from error:', err);
+
+      floatWindow.setMinimumSize(windowOptions.size.width, windowOptions.size.height);
+      floatWindow.setSize(windowOptions.size.width, windowOptions.size.height);
+      floatWindow.center();
+    }
+
+    floatWindow.focus();
+  }
+
+
+  // show the child window when it will be ready
+  new Promise(resolve => {
+    if (childWindowIsReadyToShow) {
+      resolve();
+      return;
+    }
+    ipcMain.once('window-childWindowIsReadyToShow', () => resolve());
+  }).then(() => {
+    // The child window will show itself when rendered
+    floatWindow.send('window-setFloatContents', windowOptions);
+  });
+
+});
+
+
+ipcMain.on('window-closeFloatWindow', (event) => {
+  // never close the child window, hide it instead
+  floatWindow.hide();
 });
 
 

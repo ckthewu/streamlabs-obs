@@ -4,6 +4,7 @@ import { Inject } from '../util/injector';
 import { CustomizationService } from '../services/customization';
 import { NavigationService } from '../services/navigation';
 import { UserService } from '../services/user';
+import { WindowsService } from '../services/windows';
 import electron from 'electron';
 import Login from './Login.vue';
 import { SettingsService } from '../services/settings';
@@ -19,6 +20,7 @@ export default class TopNav extends Vue {
   @Inject() customizationService: CustomizationService;
   @Inject() navigationService: NavigationService;
   @Inject() userService: UserService;
+  @Inject() windowsService: WindowsService;
 
   slideOpen = false;
 
@@ -46,6 +48,17 @@ export default class TopNav extends Vue {
 
   openSettingsWindow() {
     this.settingsService.showSettings();
+  }
+
+  openFloatWindow() {
+    console.log('open float window');
+    this.windowsService.showFloatWindow({
+      componentName: 'Barrage',
+      size: {
+        width: 800,
+        height:600
+      }
+    });
   }
 
   toggleNightTheme() {

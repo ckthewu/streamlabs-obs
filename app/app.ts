@@ -90,8 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const windowsService: WindowsService = WindowsService.instance;
   const obsApiService = ObsApiService.instance;
   const isChild = Utils.isChildWindow();
+  const isFloat = Utils.isFloatWindow();
 
-  if (isChild) {
+  if (isFloat) {
+    ipcRenderer.on('closeWindow', () => windowsService.closeFloatWindow());
+    servicesManager.listenMessages();
+  }else if (isChild) {
     ipcRenderer.on('closeWindow', () => windowsService.closeChildWindow());
     servicesManager.listenMessages();
   } else {
@@ -106,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     store,
     render: h => {
       const componentName = isChild
-        ? windowsService.state.child.componentName
+        ? isFloat ? windowsService.state.float.componentName : (windowsService.state.child.componentName)
         : windowsService.state.main.componentName;
 
       return h(windowsService.components[componentName]);
@@ -125,6 +129,23 @@ document.addEventListener('DOMContentLoaded', () => {
       // from the URL, allows child windows to be refreshed without
       // losing their contents.
       const newOptions: any = Object.assign({ child: isChild }, options);
+      const newURL: string = URI(window.location.href)
+        .query(newOptions)
+        .toString();
+
+      window.history.replaceState({}, '', newURL);
+    }
+  );
+  ipcRenderer.on(
+    'window-setFloatContents',
+    (event: Electron.Event, options: IWindowOptions) => {
+      windowsService.updateFloatWindowOptions(options);
+
+      // This is purely for developer convencience.  Changing the URL
+      // to match the current contents, as well as pulling the options
+      // from the URL, allows child windows to be refreshed without
+      // losing their contents.
+      const newOptions: any = Object.assign({ child: isChild, float: isFloat }, options);
       const newURL: string = URI(window.location.href)
         .query(newOptions)
         .toString();

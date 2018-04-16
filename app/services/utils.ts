@@ -33,6 +33,10 @@ export default class Utils {
     return !!this.getCurrentUrlParams().child;
   }
 
+  static isFloatWindow(): boolean {
+    return !!this.getCurrentUrlParams().child && !!this.getCurrentUrlParams().float;
+  }
+
   static isDevMode() {
     return process.env.NODE_ENV !== 'production';
   }

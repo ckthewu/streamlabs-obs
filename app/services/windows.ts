@@ -18,6 +18,7 @@ import AdvancedAudio from '../components/windows/AdvancedAudio.vue';
 import Notifications from '../components/windows/Notifications.vue';
 import Troubleshooter from '../components/windows/Troubleshooter.vue';
 import Blank from '../components/windows/Blank.vue';
+import Barrage from '../components/windows/Barrage.vue';
 import ManageSceneCollections from 'components/windows/ManageSceneCollections.vue';
 import { mutation, StatefulService } from './stateful-service';
 import electron from 'electron';
@@ -25,7 +26,9 @@ import electron from 'electron';
 const { ipcRenderer, remote } = electron;
 const BrowserWindow = remote.BrowserWindow;
 
-type TWindowId = 'main' | 'child';
+type TWindowId = 'main' | 'child' | 'float';
+
+enum windowIds {'main', 'child', 'float'}
 
 export interface IWindowOptions {
   componentName: string;
@@ -41,6 +44,7 @@ export interface IWindowOptions {
 interface IWindowsState {
   main: IWindowOptions;
   child: IWindowOptions;
+  float: IWindowOptions;
 }
 
 export class WindowsService extends StatefulService<IWindowsState> {
@@ -54,7 +58,11 @@ export class WindowsService extends StatefulService<IWindowsState> {
     child: {
       componentName: 'Blank',
       scaleFactor: 1,
-    }
+    },
+    float: {
+      componentName: 'Blank',
+      scaleFactor: 1,
+    },
   };
 
   // This is a list of components that are registered to be
@@ -62,6 +70,7 @@ export class WindowsService extends StatefulService<IWindowsState> {
   components = {
     Main,
     Settings,
+    Barrage,
     SceneTransitions,
     SourcesShowcase,
     NameSource,
@@ -86,8 +95,10 @@ export class WindowsService extends StatefulService<IWindowsState> {
   init() {
     this.updateScaleFactor('main');
     this.updateScaleFactor('child');
+    this.updateScaleFactor('float');
     this.getWindow('main').on('move', () => this.updateScaleFactor('main'));
     this.getWindow('child').on('move', () => this.updateScaleFactor('child'));
+    this.getWindow('float').on('move', () => this.updateScaleFactor('float'));
   }
 
   private updateScaleFactor(windowId: TWindowId) {
@@ -101,8 +112,24 @@ export class WindowsService extends StatefulService<IWindowsState> {
     ipcRenderer.send('window-showChildWindow', options);
   }
 
+  showFloatWindow(options: Partial<IWindowOptions>) {
+    console.log('showFloatWindow')
+    ipcRenderer.send('window-showFloatWindow', options);
+  }
+
   closeChildWindow() {
     ipcRenderer.send('window-closeChildWindow');
+
+    // This prevents you from seeing the previous contents
+    // of the window for a split second after it is shown.
+    this.updateChildWindowOptions({ componentName: 'Blank' });
+
+    // Refocus the main window
+    ipcRenderer.send('window-focusMain');
+  }
+
+  closeFloatWindow() {
+    ipcRenderer.send('window-closeFloatWindow');
 
     // This prevents you from seeing the previous contents
     // of the window for a split second after it is shown.
@@ -130,19 +157,37 @@ export class WindowsService extends StatefulService<IWindowsState> {
     this.UPDATE_CHILD_WINDOW_OPTIONS(options);
   }
 
+  getFloatWindowOptions(): IWindowOptions {
+    return this.state.float;
+  }
+
+  getFloatWindowQueryParams(): Dictionary<string> {
+    return this.getFloatWindowOptions().queryParams || {};
+  }
+
+
+  updateFloatWindowOptions(options: Partial<IWindowOptions>) {
+    this.UPDATE_FLOAT_WINDOW_OPTIONS(options);
+  }
+
   updateMainWindowOptions(options: Partial<IWindowOptions>) {
     this.UPDATE_MAIN_WINDOW_OPTIONS(options);
   }
 
 
   private getWindow(windowId: TWindowId): Electron.BrowserWindow {
-    return windowId === 'child' ? this.windows[1] : this.windows[0];
+    return this.windows[windowIds[windowId]];
   }
 
 
   @mutation()
   private UPDATE_CHILD_WINDOW_OPTIONS(options: Partial<IWindowOptions>) {
     this.state.child = { ...this.state.child, ...options };
+  }
+
+  @mutation()
+  private UPDATE_FLOAT_WINDOW_OPTIONS(options: Partial<IWindowOptions>) {
+    this.state.float = { ...this.state.float, ...options };
   }
 
   @mutation()
