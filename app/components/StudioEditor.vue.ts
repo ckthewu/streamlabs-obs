@@ -9,6 +9,12 @@ import { EditMenu } from '../util/menus/EditMenu';
 import { ScalableRectangle, AnchorPoint } from '../util/ScalableRectangle';
 import { WindowsService } from '../services/windows';
 import { SelectionService } from "../services/selection/selection";
+import { ISettingsServiceApi } from '../services/settings';
+
+function debounce(target: any, name: any, descript: any) {
+  const f = descript.value;
+  _.debounce(f, 50);
+}
 
 interface IResizeRegion {
   name: string;
@@ -34,6 +40,7 @@ export default class StudioEditor extends Vue {
   @Inject() private windowsService: WindowsService;
   @Inject() private videoService: VideoService;
   @Inject() private selectionService: SelectionService;
+  @Inject() private settingsService: ISettingsServiceApi;
 
   renderedWidth = 0;
   renderedHeight = 0;
@@ -47,10 +54,14 @@ export default class StudioEditor extends Vue {
   currentY: number;
   isCropping: boolean;
   canDrag = false;
+  scale = 1;
+  containerHeight = 0;
+  containerWidth = 0;
 
 
   $refs: {
-    display: HTMLElement
+    display: HTMLElement,
+    display2: HTMLElement,
   };
 
 
@@ -64,7 +75,7 @@ export default class StudioEditor extends Vue {
       this.renderedOffsetY = outputRegion.y;
     });
 
-    this.obsDisplay.trackElement(this.$refs.display);
+    this.obsDisplay.trackElement(this.$refs.display, this.initDisplay.bind(this));
   }
 
   beforeDestroy() {
@@ -109,6 +120,7 @@ export default class StudioEditor extends Vue {
   }
 
   startDragging(event: MouseEvent) {
+    console.log('start dragging');
     this.dragHandler = new DragHandler(event, this.obsDisplay);
   }
 
@@ -127,15 +139,17 @@ export default class StudioEditor extends Vue {
     // If neither a drag or resize was initiated, it must have been
     // an attempted selection or right click.
     if (!this.dragHandler && !this.resizeRegion) {
+      console.log(this.sceneItems);
       const overSource = this.sceneItems.find(source => {
         return this.isOverSource(event, source);
       });
-
+      console.log(overSource);
       // Either select a new source, or deselect all sources
       if (overSource) {
         // if sceneItem is in the folder - select the folder
         // individual source selection is in doubleclick handler
         const overNode = overSource.hasParent() ? overSource.getParent() : overSource;
+        console.log(overNode);
         if (event.ctrlKey) {
           if (overNode.isSelected()) {
             overNode.deselect();
@@ -180,6 +194,7 @@ export default class StudioEditor extends Vue {
     }
   }
 
+  @debounce
   handleMouseMove(event: MouseEvent) {
     const mousePosX = event.offsetX - this.renderedOffsetX;
     const mousePosY = event.offsetY - this.renderedOffsetY;
@@ -434,6 +449,30 @@ export default class StudioEditor extends Vue {
     const movedY = y - this.renderedOffsetY;
 
     return this.convertScalarToBaseSpace(movedX, movedY);
+  }
+
+  initDisplay() {
+    const videoSetting = this.settingsService.getSettingsFormData('Video');
+    const screenInfo = String(videoSetting[0].parameters[0].value).split('x');
+    const Swidth = +screenInfo[0];
+    const Sheight = +screenInfo[1];
+    const windowRate = Swidth / Sheight;
+    const {
+      clientWidth,
+      clientHeight,
+    } = this.$refs.display2;
+    const Dheight = clientHeight - 20;
+    const Dwidth = clientWidth - 20;
+    const divRate = Dwidth / Dheight;
+    if (windowRate < divRate) {
+      this.scale = Sheight / Dheight;
+      this.containerHeight = Dheight;
+      this.containerWidth = Dheight * windowRate;
+    } else {
+      this.scale = Swidth / Dwidth;
+      this.containerWidth = Dwidth;
+      this.containerHeight = Dwidth / windowRate;
+    }
   }
 
   // getters

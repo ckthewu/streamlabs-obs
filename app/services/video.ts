@@ -55,7 +55,7 @@ export class Display {
    * Will keep the display positioned on top of the passed HTML element
    * @param element the html element to host the display
    */
-  trackElement(element: HTMLElement) {
+  trackElement(element: HTMLElement, callback: () => void = () => undefined) {
     if (this.trackingInterval) clearInterval(this.trackingInterval);
 
     const trackingFun = () => {
@@ -65,7 +65,7 @@ export class Display {
         (rect.y !== this.currentPosition.y) ||
         (rect.width !== this.currentPosition.width) ||
         (rect.height !== this.currentPosition.height)) {
-
+        callback();
         this.move(rect.x, rect.y);
         this.resize(rect.width, rect.height);
       }
