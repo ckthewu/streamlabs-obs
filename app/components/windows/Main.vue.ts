@@ -1,14 +1,7 @@
 import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
-import TopNav from '../TopNav.vue';
 
-// Pages
-import Studio from '../pages/Studio.vue';
-import Dashboard from '../pages/Dashboard.vue';
-import BrowseOverlays from 'components/pages/BrowseOverlays.vue';
-import Live from '../pages/Live.vue';
-import Onboarding from '../pages/Onboarding.vue';
-import TitleBar from '../TitleBar.vue';
+import Pages from '../main-pages';
 import windowMixin from '../mixins/window';
 import { Inject } from '../../util/injector';
 import { CustomizationService } from 'services/customization';
@@ -16,10 +9,24 @@ import { NavigationService } from 'services/navigation';
 import { AppService } from 'services/app';
 import { UserService } from 'services/user';
 import { WindowsService } from 'services/windows';
+
+// Components
 import LiveDock from '../LiveDock.vue';
 import StudioFooter from '../StudioFooter.vue';
 import CustomLoader from '../CustomLoader.vue';
-import PatchNotes from '../pages/PatchNotes.vue';
+import TopNav from '../TopNav.vue';
+import TitleBar from '../TitleBar.vue';
+
+
+// Pages
+const {
+  Studio,
+  Dashboard,
+  BrowseOverlays,
+  Live,
+  Onboarding,
+  PatchNotes,
+} = Pages;
 
 @Component({
   mixins: [windowMixin],

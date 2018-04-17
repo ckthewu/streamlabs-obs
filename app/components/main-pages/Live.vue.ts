@@ -10,8 +10,8 @@ import Slider from '../shared/Slider.vue';
 import VTooltip from 'v-tooltip';
 
 
-Vue.use(VTooltip)
-VTooltip.options.defaultContainer = '#mainWrapper'
+Vue.use(VTooltip);
+VTooltip.options.defaultContainer = '#mainWrapper';
 
 @Component({
   components: {
@@ -25,8 +25,8 @@ export default class Live extends Vue {
   @Inject() userService: UserService;
   @Inject() customizationService: CustomizationService;
 
-  enablePreviewTooltip= "Enable the preview stream";
-  disablePreviewTooltip= "Disable the preview stream, can help with CPU";
+  enablePreviewTooltip= 'Enable the preview stream';
+  disablePreviewTooltip= 'Disable the preview stream, can help with CPU';
 
   get previewSize() {
     return this.customizationService.state.previewSize;
