@@ -1,9 +1,15 @@
+/* eslint-disable global-require */
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable strict */
+/* eslint-disable no-param-reassign */
+
 'use strict';
 
 ////////////////////////////////////////////////////////////////////////////////
-// Set Up Environment Variables
+// 环境变量设置
 ////////////////////////////////////////////////////////////////////////////////
 const pjson = require('./package.json');
+
 if (pjson.env === 'production') {
   process.env.NODE_ENV = 'production';
 }
@@ -13,16 +19,28 @@ if (pjson.name === 'slobs-client-preview') {
 process.env.SLOBS_VERSION = pjson.version;
 
 ////////////////////////////////////////////////////////////////////////////////
-// Modules and other Requires
+// 模块处理
 ////////////////////////////////////////////////////////////////////////////////
-const { app, BrowserWindow, ipcMain, session, crashReporter, dialog } = require('electron');
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  session,
+  // crashReporter,
+  // dialog,
+} = require('electron');
 const fs = require('fs');
+// TODO: 修改升级器
 const { Updater } = require('./updater/Updater.js');
+// uuid生成
 const uuid = require('uuid/v4');
+// rm -rf
 const rimraf = require('rimraf');
 const path = require('path');
 const windowStateKeeper = require('electron-window-state');
 
+// 禁用硬件加速
+// TODO: WHY
 app.disableHardwareAcceleration();
 
 if (process.argv.includes('--clearCacheDir')) {
@@ -30,19 +48,21 @@ if (process.argv.includes('--clearCacheDir')) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Main Program
+// 主进程
 ////////////////////////////////////////////////////////////////////////////////
 
-function log(...args) {
-  if (!process.env.SLOBS_DISABLE_MAIN_LOGGING) {
+let log = () => {};
+
+if (!process.env.SLOBS_DISABLE_MAIN_LOGGING) {
+  log = function l(...args) {
     console.log(...args);
-  }
+  };
 }
 
 // Windows
-let mainWindow;
-let childWindow;
-let floatWindow;
+let mainWindow; // 主窗口
+let childWindow; // 子弹窗 设置页等
+let floatWindow;  // 浮动弹窗 用于透明图层
 let childWindowIsReadyToShow = false;
 
 // Somewhat annoyingly, this is needed so that the child window
@@ -52,7 +72,7 @@ let allowMainWindowClose = false;
 let shutdownStarted = false;
 let appShutdownTimeout;
 
-const indexUrl = 'file://' + __dirname + '/index.html';
+const indexUrl = `file://${__dirname}/index.html`;
 
 
 function openDevTools() {
@@ -76,50 +96,52 @@ function getObs() {
 function startApp() {
   const isDevMode = (process.env.NODE_ENV !== 'production') && (process.env.NODE_ENV !== 'test');
 
-  const bt = require('backtrace-node');
+  // 初始化崩溃钩子
+  // TODO: 修改到自己的崩溃服务器上
+  // const bt = require('backtrace-node');
 
-  function handleFinishedReport() {
-    dialog.showErrorBox(`Unhandled Exception`,
-    'An unexpected error occured and the application must be shut down.\n' +
-    'Information concerning this occasion has been sent for debugging purposes.\n' +
-    'Sorry for the inconvenience and thanks for your patience as we work out the bugs!\n' +
-    'Please restart the application.');
+  // function handleFinishedReport() {
+  //   dialog.showErrorBox(`Unhandled Exception`,
+  //   'An unexpected error occured and the application must be shut down.\n' +
+  //   'Information concerning this occasion has been sent for debugging purposes.\n' +
+  //   'Sorry for the inconvenience and thanks for your patience as we work out the bugs!\n' +
+  //   'Please restart the application.');
 
-    if (app) {
-      app.quit();
-    }
-  }
+  //   if (app) {
+  //     app.quit();
+  //   }
+  // }
 
-  function handleUnhandledException(err) {
-    bt.report(err, {}, handleFinishedReport);
-  }
+  // function handleUnhandledException(err) {
+  //   bt.report(err, {}, handleFinishedReport);
+  // }
 
-  if (pjson.env === 'production') {
-    bt.initialize({
-      disableGlobalHandler: true,
-      endpoint: 'https://streamlabs.sp.backtrace.io:6098',
-      token: 'e3f92ff3be69381afe2718f94c56da4644567935cc52dec601cf82b3f52a06ce',
-      attributes: {
-        version: pjson.version,
-        processType: 'main'
-      }
-    });
+  // if (pjson.env === 'production') {
+  //   bt.initialize({
+  //     disableGlobalHandler: true,
+  //     endpoint: 'https://streamlabs.sp.backtrace.io:6098',
+  //     token: 'e3f92ff3be69381afe2718f94c56da4644567935cc52dec601cf82b3f52a06ce',
+  //     attributes: {
+  //       version: pjson.version,
+  //       processType: 'main'
+  //     }
+  //   });
 
-    process.on('uncaughtException', handleUnhandledException);
+  //   process.on('uncaughtException', handleUnhandledException);
 
-    crashReporter.start({
-      productName: 'streamlabs-obs',
-      companyName: 'streamlabs',
-      submitURL:
-        'https://streamlabs.sp.backtrace.io:6098/post?' +
-        'format=minidump&' +
-        'token=e3f92ff3be69381afe2718f94c56da4644567935cc52dec601cf82b3f52a06ce',
-      extra: {
-        version: pjson.version,
-        processType: 'main'
-      }
-    });
-  }
+  //   crashReporter.start({
+  //     productName: 'streamlabs-obs',
+  //     companyName: 'streamlabs',
+  //     submitURL:
+  //       'https://streamlabs.sp.backtrace.io:6098/post?' +
+  //       'format=minidump&' +
+  //       'token=e3f92ff3be69381afe2718f94c56da4644567935cc52dec601cf82b3f52a06ce',
+  //     extra: {
+  //       version: pjson.version,
+  //       processType: 'main'
+  //     }
+  //   });
+  // }
 
   const mainWindowState = windowStateKeeper({
     defaultWidth: 1600,
@@ -135,7 +157,7 @@ function startApp() {
     y: mainWindowState.y,
     show: false,
     frame: false,
-    title: 'Streamlabs OBS',
+    title: 'Streamlabs OBS', // TODO: 修改标题
   });
 
   mainWindowState.manage(mainWindow);
@@ -200,7 +222,7 @@ function startApp() {
     transparent: true,
     // focusable: false,
     alwaysOnTop: true,
-  }); 
+  });
 
   childWindow.setMenu(null);
 
@@ -252,8 +274,8 @@ function startApp() {
 
   ipcMain.on('services-ready', () => {
     callService('AppService', 'setArgv', process.argv);
-    childWindow.loadURL(indexUrl + '?child=true');
-    floatWindow.loadURL(indexUrl + '?child=true&float=true');
+    childWindow.loadURL(`${indexUrl}?child=true`);
+    floatWindow.loadURL(`${indexUrl}?child=true&float=true`);
   });
 
   ipcMain.on('window-childWindowIsReadyToShow', () => {
@@ -289,18 +311,17 @@ function startApp() {
     setTimeout(() => {
       openDevTools();
     }, 10 * 1000);
-
   }
 
   // Initialize various OBS services
   getObs().SetWorkingDirectory(
-    path.join(app.getAppPath().replace('app.asar', 'app.asar.unpacked') + 
-              '/node_modules/obs-studio-node'));
+    path.join(`${app.getAppPath().replace('app.asar', 'app.asar.unpacked')}/node_modules/obs-studio-node`));
 
   getObs().OBS_API_initAPI(app.getPath('userData'));
 }
 
 // We use a special cache directory for running tests
+// TODO：考虑下是否去掉
 if (process.env.SLOBS_CACHE_DIR) {
   app.setPath('appData', process.env.SLOBS_CACHE_DIR);
 }
@@ -378,17 +399,17 @@ ipcMain.on('window-showChildWindow', (event, windowOptions) => {
     // The child window will show itself when rendered
     childWindow.send('window-setContents', windowOptions);
   });
-
 });
 
 
-ipcMain.on('window-closeChildWindow', (event) => {
+ipcMain.on('window-closeChildWindow', () => {
   // never close the child window, hide it instead
   childWindow.hide();
 });
 
+// TODO: 浮动窗口不同的地方需要修改
 ipcMain.on('window-showFloatWindow', (event, windowOptions) => {
-  console.log('on window-showFloatWindow')
+  console.log('on window-showFloatWindow');
   if (windowOptions.size.width && windowOptions.size.height) {
     // Center the child window on the main window
 
@@ -432,11 +453,10 @@ ipcMain.on('window-showFloatWindow', (event, windowOptions) => {
     // The child window will show itself when rendered
     floatWindow.send('window-setFloatContents', windowOptions);
   });
-
 });
 
 
-ipcMain.on('window-closeFloatWindow', (event) => {
+ipcMain.on('window-closeFloatWindow', () => {
   // never close the child window, hide it instead
   floatWindow.hide();
 });
@@ -448,11 +468,11 @@ ipcMain.on('window-focusMain', () => {
 
 // The main process acts as a hub for various windows
 // syncing their vuex stores.
-let registeredStores = {};
+const registeredStores = {};
 
 ipcMain.on('vuex-register', event => {
-  let win = BrowserWindow.fromWebContents(event.sender);
-  let windowId = win.id;
+  const win = BrowserWindow.fromWebContents(event.sender);
+  const windowId = win.id;
 
   // Register can be received multiple times if the window is
   // refreshed.  We only want to register it once.
@@ -463,7 +483,7 @@ ipcMain.on('vuex-register', event => {
     // Make sure we unregister is when it is closed
     win.on('closed', () => {
       delete registeredStores[windowId];
-      log('Registered vuex stores: ', Object.keys(registeredStores));
+      log('Cancellation vuex stores: ', Object.keys(registeredStores));
     });
   }
 
