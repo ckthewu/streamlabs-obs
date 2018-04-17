@@ -47,13 +47,14 @@ interface IWindowsState {
   float: IWindowOptions;
 }
 
+// TODO:新增窗口处理复杂 需重构
 export class WindowsService extends StatefulService<IWindowsState> {
 
   static initialState: IWindowsState = {
     main: {
       componentName: 'Main',
       scaleFactor: 1,
-      title: `Streamlabs OBS - Version: ${remote.process.env.SLOBS_VERSION}`
+      title: `Streamlabs OBS - Version: ${remote.process.env.SLOBS_VERSION}` // TODO:title
     },
     child: {
       componentName: 'Blank',
@@ -113,7 +114,7 @@ export class WindowsService extends StatefulService<IWindowsState> {
   }
 
   showFloatWindow(options: Partial<IWindowOptions>) {
-    console.log('showFloatWindow')
+    console.log('showFloatWindow');
     ipcRenderer.send('window-showFloatWindow', options);
   }
 
