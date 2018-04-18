@@ -18,4 +18,5 @@ electron.VC.db
 .vs/
 plugins/
 yarn-error.log
+.vscode/
 

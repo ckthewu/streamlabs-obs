@@ -92,7 +92,7 @@ class Updater {
       if (!this.finished) app.quit();
     });
 
-    browserWindow.loadURL('file://' + __dirname + '/index.html');
+    browserWindow.loadURL(`file://${__dirname}/index.html`);
 
     return browserWindow;
   }
