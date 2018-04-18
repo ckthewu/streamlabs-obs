@@ -15,9 +15,9 @@ export default {
   // Operates on rational values. Determines if the rate
   // is within the given range.
   rateInRange(rate, min, max) {
-    let t = this.rationalToFrameInterval(rate);
-    let tMax = this.rationalToFrameInterval(min);
-    let tMin = this.rationalToFrameInterval(max);
+    const t = this.rationalToFrameInterval(rate);
+    const tMax = this.rationalToFrameInterval(min);
+    const tMin = this.rationalToFrameInterval(max);
 
     return (tMin <= t) && (tMax >= t);
   },
@@ -25,11 +25,8 @@ export default {
   // Returns common FPS values which are valid in at least
   // one of the given FPS ranges.
   simpleFPSValuesForRanges(ranges) {
-    return _.filter(this.commonFPSValues(), value => {
-      return !!(_.find(ranges, range => {
-        return this.rateInRange(value, range.min, range.max);
-      }));
-    });
+    return _.filter(this.commonFPSValues(),
+    value => !!(_.find(ranges, range => this.rateInRange(value, range.min, range.max))));
   },
 
   // These are the same presets that the OBS UI uses

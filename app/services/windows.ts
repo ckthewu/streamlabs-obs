@@ -2,24 +2,8 @@
 // for spawning various child windows.
 
 import Main from '../components/windows/Main.vue';
-import Settings from '../components/windows/Settings.vue';
-import SourcesShowcase from '../components/windows/SourcesShowcase.vue';
-import SceneTransitions from '../components/windows/SceneTransitions.vue';
-import AddSource from '../components/windows/AddSource.vue';
-import NameSceneCollection from '../components/windows/NameSceneCollection.vue';
-import NameSource from '../components/windows/NameSource.vue';
-import NameScene from '../components/windows/NameScene.vue';
-import NameFolder from '../components/windows/NameFolder.vue';
-import SourceProperties from '../components/windows/SourceProperties.vue';
-import SourceFilters from '../components/windows/SourceFilters.vue';
-import AddSourceFilter from '../components/windows/AddSourceFilter.vue';
-import EditStreamInfo from '../components/windows/EditStreamInfo.vue';
-import AdvancedAudio from '../components/windows/AdvancedAudio.vue';
-import Notifications from '../components/windows/Notifications.vue';
-import Troubleshooter from '../components/windows/Troubleshooter.vue';
 import Blank from '../components/windows/Blank.vue';
 import Barrage from '../components/windows/Barrage.vue';
-import ManageSceneCollections from 'components/windows/ManageSceneCollections.vue';
 import { mutation, StatefulService } from './stateful-service';
 import electron from 'electron';
 
@@ -70,24 +54,8 @@ export class WindowsService extends StatefulService<IWindowsState> {
   // top level components in new child windows.
   components = {
     Main,
-    Settings,
-    Barrage,
-    SceneTransitions,
-    SourcesShowcase,
-    NameSource,
-    AddSource,
-    NameScene,
-    NameSceneCollection,
-    NameFolder,
-    SourceProperties,
-    SourceFilters,
-    AddSourceFilter,
     Blank,
-    EditStreamInfo,
-    AdvancedAudio,
-    Notifications,
-    Troubleshooter,
-    ManageSceneCollections
+    Barrage,
   };
 
   private windows: Electron.BrowserWindow[] = BrowserWindow.getAllWindows();
