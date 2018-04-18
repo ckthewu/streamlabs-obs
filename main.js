@@ -39,6 +39,10 @@ const rimraf = require('rimraf');
 const path = require('path');
 const windowStateKeeper = require('electron-window-state');
 const screenres = require('screenres');
+const argv = require('yargs').parse(process.argv.slice(1));
+
+// 读取命令行参数
+console.log(argv);
 
 // 禁用硬件加速
 // TODO: WHY

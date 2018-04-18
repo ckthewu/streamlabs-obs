@@ -76,7 +76,8 @@
     "rimraf": "^2.6.1",
     "screenres": "^2.0.1",
     "socket.io-client": "2.0.3",
-    "uuid": "^3.0.1"
+    "uuid": "^3.0.1",
+    "yargs": "^11.0.0"
   },
   "devDependencies": {
     "7zip-bin": "^2.0.4",
