@@ -74,6 +74,7 @@
     "node-libuiohook": "file:./node-libuiohook",
     "obs-studio-node": "file:./streamlabs-x86_64-signed.tar.gz",
     "rimraf": "^2.6.1",
+    "screenres": "^2.0.1",
     "socket.io-client": "2.0.3",
     "uuid": "^3.0.1"
   },

@@ -38,6 +38,7 @@ const uuid = require('uuid/v4');
 const rimraf = require('rimraf');
 const path = require('path');
 const windowStateKeeper = require('electron-window-state');
+const screenres = require('screenres');
 
 // 禁用硬件加速
 // TODO: WHY
@@ -216,12 +217,17 @@ function startApp() {
     transparent: true,
   });
 
+  const [windowWidth, windowHeight] = screenres.get();
   floatWindow = new BrowserWindow({
     show: false,
     frame: false,
     transparent: true,
     // focusable: false,
     alwaysOnTop: true,
+    x: 0,
+    y: 0,
+    width: windowWidth,
+    height: windowHeight,
   });
 
   childWindow.setMenu(null);
@@ -408,9 +414,9 @@ ipcMain.on('window-closeChildWindow', () => {
 });
 
 // TODO: 浮动窗口不同的地方需要修改
-ipcMain.on('window-showFloatWindow', (event, windowOptions) => {
+ipcMain.on('window-showFloatWindow', (event, windowOptions = {}) => {
   console.log('on window-showFloatWindow');
-  if (windowOptions.size.width && windowOptions.size.height) {
+  if (windowOptions.size && windowOptions.size.width && windowOptions.size.height) {
     // Center the child window on the main window
 
     // For some unknown reason, electron sometimes gets into a

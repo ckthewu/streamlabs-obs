@@ -53,11 +53,7 @@ export default class TopNav extends Vue {
   openFloatWindow() {
     console.log('open float window');
     this.windowsService.showFloatWindow({
-      componentName: 'Barrage',
-      size: {
-        width: 800,
-        height:600
-      }
+      componentName: 'Barrage'
     });
   }
 

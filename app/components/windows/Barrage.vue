@@ -19,8 +19,10 @@
   position: absolute;
   left: 0;
   top:0;
-  animation: ani 5s infinite;
-  -webkit-app-region: drag;
+  // animation: ani 5s infinite;
+  // -webkit-app-region: drag;
+  user-select: none;
+  pointer-events: none;
 }
 
 .barrage {
