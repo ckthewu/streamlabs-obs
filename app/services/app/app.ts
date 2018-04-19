@@ -1,23 +1,23 @@
 import { StatefulService, mutation } from '../stateful-service';
-import { OnboardingService } from '../onboarding';
-import { HotkeysService } from '../hotkeys';
-import { UserService } from '../user';
-import { ShortcutsService } from '../shortcuts';
+// import { OnboardingService } from '../onboarding';
+// import { HotkeysService } from '../hotkeys';
+// import { UserService } from '../user';
+// import { ShortcutsService } from '../shortcuts';
 import { Inject } from '../../util/injector';
 import electron from 'electron';
-import { ScenesTransitionsService } from '../scenes-transitions';
-import { SourcesService } from '../sources';
-import { ScenesService } from '../scenes';
-import { VideoService } from '../video';
-import { StreamInfoService } from '../stream-info';
+// import { ScenesTransitionsService } from '../scenes-transitions';
+// import { SourcesService } from '../sources';
+// import { ScenesService } from '../scenes';
+// import { VideoService } from '../video';
+// import { StreamInfoService } from '../stream-info';
 import { track } from '../usage-statistics';
-import { IpcServerService } from '../ipc-server';
-import { TcpServerService } from '../tcp-server';
-import { StreamlabelsService } from '../streamlabels';
-import { PerformanceMonitorService } from '../performance-monitor';
-import { SceneCollectionsService } from 'services/scene-collections';
-import { FileManagerService } from 'services/file-manager';
-import { PatchNotesService } from 'services/patch-notes';
+// import { IpcServerService } from '../ipc-server';
+// import { TcpServerService } from '../tcp-server';
+// import { StreamlabelsService } from '../streamlabels';
+// import { PerformanceMonitorService } from '../performance-monitor';
+// import { SceneCollectionsService } from 'services/scene-collections';
+// import { FileManagerService } from 'services/file-manager';
+// import { PatchNotesService } from 'services/patch-notes';
 
 interface IAppState {
   loading: boolean;
@@ -29,13 +29,13 @@ interface IAppState {
  * mainly calls into other services to do the heavy lifting.
  */
 export class AppService extends StatefulService<IAppState> {
-  @Inject() onboardingService: OnboardingService;
-  @Inject() sceneCollectionsService: SceneCollectionsService;
-  @Inject() hotkeysService: HotkeysService;
-  @Inject() userService: UserService;
-  @Inject() shortcutsService: ShortcutsService;
-  @Inject() streamInfoService: StreamInfoService;
-  @Inject() patchNotesService: PatchNotesService;
+  // @Inject() onboardingService: OnboardingService;
+  // @Inject() sceneCollectionsService: SceneCollectionsService;
+  // @Inject() hotkeysService: HotkeysService;
+  // @Inject() userService: UserService;
+  // @Inject() shortcutsService: ShortcutsService;
+  // @Inject() streamInfoService: StreamInfoService;
+  // @Inject() patchNotesService: PatchNotesService;
 
   static initialState: IAppState = {
     loading: true,
@@ -44,48 +44,51 @@ export class AppService extends StatefulService<IAppState> {
 
   private autosaveInterval: number;
 
-  @Inject() scenesTransitionsService: ScenesTransitionsService;
-  @Inject() sourcesService: SourcesService;
-  @Inject() scenesService: ScenesService;
-  @Inject() videoService: VideoService;
-  @Inject() streamlabelsService: StreamlabelsService;
-  @Inject() private ipcServerService: IpcServerService;
-  @Inject() private tcpServerService: TcpServerService;
-  @Inject() private performanceMonitorService: PerformanceMonitorService;
-  @Inject() private fileManagerService: FileManagerService;
+  // @Inject() scenesTransitionsService: ScenesTransitionsService;
+  // @Inject() sourcesService: SourcesService;
+  // @Inject() scenesService: ScenesService;
+  // @Inject() videoService: VideoService;
+  // @Inject() streamlabelsService: StreamlabelsService;
+  // @Inject() private ipcServerService: IpcServerService;
+  // @Inject() private tcpServerService: TcpServerService;
+  // @Inject() private performanceMonitorService: PerformanceMonitorService;
+  // @Inject() private fileManagerService: FileManagerService;
 
   @track('app_start')
   load() {
     this.START_LOADING();
-
+    // TODO: 修改结束loading位置
+    setTimeout(() => {
+      this.finishLoading();
+    }, 1000);
     // We want to start this as early as possible so that any
     // exceptions raised while loading the configuration are
     // associated with the user in sentry.
-    this.userService;
+    // this.userService;
 
-    this.sceneCollectionsService.initialize().then(() => {
-      const onboarded = this.onboardingService.startOnboardingIfRequired();
+    // this.sceneCollectionsService.initialize().then(() => {
+    //   const onboarded = this.onboardingService.startOnboardingIfRequired();
 
-      electron.ipcRenderer.on('shutdown', () => {
-        electron.ipcRenderer.send('acknowledgeShutdown');
-        this.shutdownHandler();
-      });
+    //   electron.ipcRenderer.on('shutdown', () => {
+    //     electron.ipcRenderer.send('acknowledgeShutdown');
+    //     this.shutdownHandler();
+    //   });
 
-      this.shortcutsService;
-      this.streamlabelsService;
+    //   this.shortcutsService;
+    //   this.streamlabelsService;
 
-      // Pre-fetch stream info
-      this.streamInfoService;
+    //   // Pre-fetch stream info
+    //   this.streamInfoService;
 
-      this.performanceMonitorService.start();
+    //   this.performanceMonitorService.start();
 
-      this.ipcServerService.listen();
-      this.tcpServerService.listen();
+    //   this.ipcServerService.listen();
+    //   this.tcpServerService.listen();
 
-      this.patchNotesService.showPatchNotesIfRequired(onboarded);
+    //   this.patchNotesService.showPatchNotesIfRequired(onboarded);
 
-      this.FINISH_LOADING();
-    });
+    //   this.FINISH_LOADING();
+    // });
   }
 
   /**
@@ -99,15 +102,15 @@ export class AppService extends StatefulService<IAppState> {
   private shutdownHandler() {
     this.START_LOADING();
 
-    this.ipcServerService.stopListening();
-    this.tcpServerService.stopListening();
+    // this.ipcServerService.stopListening();
+    // this.tcpServerService.stopListening();
 
     window.setTimeout(async () => {
-      await this.sceneCollectionsService.deinitialize();
-      this.performanceMonitorService.stop();
-      this.videoService.destroyAllDisplays();
-      this.scenesTransitionsService.reset();
-      await this.fileManagerService.flushAll();
+      // await this.sceneCollectionsService.deinitialize();
+      // this.performanceMonitorService.stop();
+      // this.videoService.destroyAllDisplays();
+      // this.scenesTransitionsService.reset();
+      // await this.fileManagerService.flushAll();
       electron.ipcRenderer.send('shutdownComplete');
     }, 300);
   }

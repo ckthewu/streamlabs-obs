@@ -7,7 +7,7 @@ import Vue from 'vue';
 import URI from 'urijs';
 
 import { createStore } from './store';
-import { ObsApiService } from './services/obs-api';
+// import { ObsApiService } from './services/obs-api';
 import { IWindowOptions, WindowsService } from './services/windows';
 import { AppService } from './services/app';
 import { ServicesManager } from './services-manager';
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const store = createStore();
   const servicesManager: ServicesManager = ServicesManager.instance;
   const windowsService: WindowsService = WindowsService.instance;
-  const obsApiService = ObsApiService.instance;
+  // const obsApiService = ObsApiService.instance;
   const isChild = Utils.isChildWindow();
   const isFloat = Utils.isFloatWindow();
 
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     AppService.instance.load();
   }
 
-  window['obs'] = obsApiService.nodeObs;
+  // window['obs'] = obsApiService.nodeObs;
 
   const vm = new Vue({
     el: '#app',

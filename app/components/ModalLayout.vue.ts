@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { Component, Prop } from 'vue-property-decorator';
 import { WindowsService } from 'services/windows';
-import { CustomizationService } from 'services/customization';
+// import { CustomizationService } from 'services/customization';
 import { Inject } from 'util/injector';
 import TitleBar from './TitleBar.vue';
 import { AppService } from 'services/app';
@@ -15,7 +15,7 @@ export default class ModalLayout extends Vue {
   contentStyle: Object = {};
   fixedStyle: Object = {};
 
-  @Inject() customizationService: CustomizationService;
+  // @Inject() customizationService: CustomizationService;
   @Inject() windowsService: WindowsService;
   @Inject() appService: AppService;
 
@@ -71,7 +71,8 @@ export default class ModalLayout extends Vue {
   }
 
   get nightTheme() {
-    return this.customizationService.nightMode;
+    // return this.customizationService.nightMode;
+    return true;
   }
 
   cancel() {
