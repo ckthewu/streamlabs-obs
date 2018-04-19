@@ -28,7 +28,7 @@ function buildNodeObs() {
     } --runtime-version ${runtimeVersion}`
   );
 
-  const nodeObsBuildPath = path.resolve(nodeObsPath, `build`);
+  const nodeObsBuildPath = path.resolve(nodeObsPath, 'build');
   shell.exec(`cmake --build ${nodeObsBuildPath} --config ${configType}`);
   shell.exec(
     `cmake --build ${nodeObsBuildPath} --target install --config ${

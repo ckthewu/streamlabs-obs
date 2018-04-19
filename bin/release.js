@@ -300,7 +300,7 @@ async function runScript() {
   sentryCli(`finalize "${newVersion}`);
 
   info(`Merging ${targetBranch} back into staging...`);
-  executeCmd(`git checkout staging`);
+  executeCmd('git checkout staging');
   executeCmd(`git merge ${targetBranch}`);
   executeCmd('git push origin HEAD');
 
