@@ -1,7 +1,7 @@
 import { Service } from './service';
 import { Inject } from '../util/injector';
-import { UserService } from './user';
-import { HostsService } from './hosts';
+// import { UserService } from './user';
+// import { HostsService } from './hosts';
 import fs from 'fs';
 import path from 'path';
 import electron from 'electron';
@@ -36,8 +36,8 @@ export function track(event: TUsageEvent) {
 
 
 export class UsageStatisticsService extends Service {
-  @Inject() userService: UserService;
-  @Inject() hostsService: HostsService;
+  // @Inject() userService: UserService;
+  // @Inject() hostsService: HostsService;
 
   installerId: string;
 
@@ -87,27 +87,27 @@ export class UsageStatisticsService extends Service {
     const headers = new Headers();
     headers.append('Content-Type', 'application/json');
 
-    const bodyData: IUsageApiData = {
-      slobs_user_id: this.userService.getLocalUserId(),
-      event,
-      data: metadata
-    };
+    // const bodyData: IUsageApiData = {
+    //   slobs_user_id: this.userService.getLocalUserId(),
+    //   event,
+    //   data: metadata
+    // };
 
-    if (this.userService.isLoggedIn()) {
-      bodyData.token = this.userService.widgetToken;
-    }
+    // if (this.userService.isLoggedIn()) {
+    //   bodyData.token = this.userService.widgetToken;
+    // }
 
-    if (this.installerId) {
-      bodyData.installer_id = this.installerId;
-    }
+    // if (this.installerId) {
+    //   bodyData.installer_id = this.installerId;
+    // }
 
-    const request = new Request(`https://${this.hostsService.streamlabs}/api/v5/slobs/log`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(bodyData)
-    });
+    // const request = new Request(`https://${this.hostsService.streamlabs}/api/v5/slobs/log`, {
+    //   method: 'POST',
+    //   headers,
+    //   body: JSON.stringify(bodyData)
+    // });
 
-    return fetch(request);
+    // return fetch(request);
   }
 
 }
