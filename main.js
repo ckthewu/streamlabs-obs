@@ -87,15 +87,15 @@ function openDevTools() {
 }
 
 // Lazy require OBS
-let _obs;
+// let _obs;
 
-function getObs() {
-  if (!_obs) {
-    _obs = require('obs-studio-node').NodeObs;
-  }
+// function getObs() {
+//   if (!_obs) {
+//     _obs = require('obs-studio-node').NodeObs;
+//   }
 
-  return _obs;
-}
+//   return _obs;
+// }
 
 
 function startApp() {
@@ -162,7 +162,7 @@ function startApp() {
     y: mainWindowState.y,
     show: false,
     frame: false,
-    title: 'Streamlabs OBS', // TODO: 修改标题
+    title: '这是一个主窗口', // TODO: 修改标题
   });
 
   mainWindowState.manage(mainWindow);
@@ -210,7 +210,7 @@ function startApp() {
   mainWindow.on('closed', () => {
     require('node-libuiohook').stopHook();
     session.defaultSession.flushStorageData();
-    getObs().OBS_API_destroyOBS_API();
+    // getObs().OBS_API_destroyOBS_API();
     app.quit();
   });
 
@@ -324,10 +324,11 @@ function startApp() {
   }
 
   // Initialize various OBS services
-  getObs().SetWorkingDirectory(
-    path.join(`${app.getAppPath().replace('app.asar', 'app.asar.unpacked')}/node_modules/obs-studio-node`));
+  // getObs().SetWorkingDirectory(
+  //   path.join(
+  //  `${app.getAppPath().replace('app.asar', 'app.asar.unpacked')}/node_modules/obs-studio-node`));
 
-  getObs().OBS_API_initAPI(app.getPath('userData'));
+  // getObs().OBS_API_initAPI(app.getPath('userData'));
 }
 
 // We use a special cache directory for running tests
@@ -526,65 +527,65 @@ ipcMain.on('vuex-mutation', (event, mutation) => {
 // API calls, but are actually Javascript functions.
 // These should be used sparingly, and are used to
 // ensure atomic operation of a handful of calls.
-const nodeObsVirtualMethods = {
+// const nodeObsVirtualMethods = {
 
-  OBS_test_callbackProxy(num, cb) {
-    setTimeout(() => {
-      cb(num + 1);
-    }, 5000);
-  }
+//   OBS_test_callbackProxy(num, cb) {
+//     setTimeout(() => {
+//       cb(num + 1);
+//     }, 5000);
+//   }
 
-};
+// };
 
 // These are called constantly and dirty up the logs.
 // They can be commented out of this list on the rare
 // occasional that they are useful in the log output.
-const filteredObsApiMethods = [
-  'OBS_content_getSourceSize',
-  'OBS_content_getSourceFlags',
-  'OBS_API_getPerformanceStatistics'
-];
+// const filteredObsApiMethods = [
+//   'OBS_content_getSourceSize',
+//   'OBS_content_getSourceFlags',
+//   'OBS_API_getPerformanceStatistics'
+// ];
 
 // Proxy node OBS calls
-ipcMain.on('obs-apiCall', (event, data) => {
-  let retVal;
-  const shouldLog = !filteredObsApiMethods.includes(data.method);
+// ipcMain.on('obs-apiCall', (event, data) => {
+//   let retVal;
+//   const shouldLog = !filteredObsApiMethods.includes(data.method);
 
-  if (shouldLog) log('OBS API CALL', data);
+//   if (shouldLog) log('OBS API CALL', data);
 
-  const mappedArgs = data.args.map(arg => {
-    const isCallbackPlaceholder = (typeof arg === 'object') && arg && arg.__obsCallback;
+//   const mappedArgs = data.args.map(arg => {
+//     const isCallbackPlaceholder = (typeof arg === 'object') && arg && arg.__obsCallback;
 
-    if (isCallbackPlaceholder) {
-      return (...args) => {
-        if (!event.sender.isDestroyed()) {
-          event.sender.send('obs-apiCallback', {
-            id: arg.id,
-            args
-          });
-        }
-      };
-    }
+//     if (isCallbackPlaceholder) {
+//       return (...args) => {
+//         if (!event.sender.isDestroyed()) {
+//           event.sender.send('obs-apiCallback', {
+//             id: arg.id,
+//             args
+//           });
+//         }
+//       };
+//     }
 
-    return arg;
-  });
+//     return arg;
+//   });
 
-  if (nodeObsVirtualMethods[data.method]) {
-    retVal = nodeObsVirtualMethods[data.method].apply(null, mappedArgs);
-  } else {
-    retVal = getObs()[data.method](...mappedArgs);
-  }
+//   if (nodeObsVirtualMethods[data.method]) {
+//     retVal = nodeObsVirtualMethods[data.method].apply(null, mappedArgs);
+//   } else {
+//     retVal = getObs()[data.method](...mappedArgs);
+//   }
 
-  if (shouldLog) log('OBS RETURN VALUE', retVal);
+//   if (shouldLog) log('OBS RETURN VALUE', retVal);
 
-  // electron ipc doesn't like returning undefined, so
-  // we return null instead.
-  if (retVal == null) {
-    retVal = null;
-  }
+//   // electron ipc doesn't like returning undefined, so
+//   // we return null instead.
+//   if (retVal == null) {
+//     retVal = null;
+//   }
 
-  event.returnValue = retVal;
-});
+//   event.returnValue = retVal;
+// });
 
 // Used for guaranteeing unique ids for objects in the vuex store
 ipcMain.on('getUniqueId', event => {
@@ -597,11 +598,11 @@ ipcMain.on('restartApp', () => {
   mainWindow.close();
 });
 
-ipcMain.on('requestSourceAttributes', (e, names) => {
-  const sizes = require('obs-studio-node').getSourcesSize(names);
+// ipcMain.on('requestSourceAttributes', (e, names) => {
+//   const sizes = require('obs-studio-node').getSourcesSize(names);
 
-  e.sender.send('notifySourceAttributes', sizes);
-});
+//   e.sender.send('notifySourceAttributes', sizes);
+// });
 
 ipcMain.on('streamlabels-writeFile', (e, info) => {
   fs.writeFile(info.path, info.data, err => {
