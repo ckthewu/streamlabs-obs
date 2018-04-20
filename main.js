@@ -13,7 +13,7 @@ const pjson = require('./package.json');
 if (pjson.env === 'production') {
   process.env.NODE_ENV = 'production';
 }
-if (pjson.name === 'slobs-client-preview') {
+if (pjson.name === 'xigua-live-assistant-preview') {
   process.env.SLOBS_PREVIEW = true;
 }
 process.env.SLOBS_VERSION = pjson.version;
@@ -31,7 +31,7 @@ const {
 } = require('electron');
 const fs = require('fs');
 // TODO: 修改升级器
-const { Updater } = require('./updater/Updater.js');
+// const { Updater } = require('./updater/Updater.js');
 // uuid生成
 const uuid = require('uuid/v4');
 // rm -rf
@@ -154,7 +154,7 @@ function startApp() {
   });
 
   mainWindow = new BrowserWindow({
-    minWidth: 800,
+    minWidth: 300,
     minHeight: 600,
     width: mainWindowState.width,
     height: mainWindowState.height,
@@ -176,20 +176,33 @@ function startApp() {
   setTimeout(() => {
     mainWindow.loadURL(indexUrl);
   }, isDevMode ? LOAD_DELAY : 0);
-
   mainWindow.on('close', e => {
+    console.log('window onclose');
     if (!shutdownStarted) {
       shutdownStarted = true;
       childWindow.destroy();
       floatWindow.destroy();
       mainWindow.send('shutdown');
-
+      mainWindow.webContents.send('services-request', {
+        jsonrpc: '2.0',
+        method: 'startLoading',
+        params: {
+          resource: 'AppService',
+        }
+      });
       // We give the main window 10 seconds to acknowledge a request
       // to shut down.  Otherwise, we just close it.
       appShutdownTimeout = setTimeout(() => {
         allowMainWindowClose = true;
+        mainWindow.webContents.send('services-request', {
+          jsonrpc: '2.0',
+          method: 'finishLoading',
+          params: {
+            resource: 'AppService',
+          }
+        });
         if (!mainWindow.isDestroyed()) mainWindow.close();
-      }, 10 * 1000);
+      }, 2 * 1000);
     }
 
     if (!allowMainWindowClose) e.preventDefault();
@@ -336,7 +349,7 @@ function startApp() {
 if (process.env.SLOBS_CACHE_DIR) {
   app.setPath('appData', process.env.SLOBS_CACHE_DIR);
 }
-app.setPath('userData', path.join(app.getPath('appData'), 'slobs-client'));
+app.setPath('userData', path.join(app.getPath('appData'), 'xigua-live-assistant'));
 
 // This ensures that only one copy of our app can run at once.
 const shouldQuit = app.makeSingleInstance(() => {
@@ -355,11 +368,13 @@ if (shouldQuit) {
 }
 
 app.on('ready', () => {
-  if ((process.env.NODE_ENV === 'production') || process.env.SLOBS_FORCE_AUTO_UPDATE) {
-    (new Updater(startApp)).run();
-  } else {
-    startApp();
-  }
+  // 暂时不启用自动更新
+  // if ((process.env.NODE_ENV === 'production') || process.env.SLOBS_FORCE_AUTO_UPDATE) {
+  //   (new Updater(startApp)).run();
+  // } else {
+  //   startApp();
+  // }
+  startApp();
 });
 
 ipcMain.on('openDevTools', () => {

@@ -1,8 +1,8 @@
 <template>
 <div class="titlebar" :class="{'night-theme': nightMode}">
-  <img class="titlebar-icon" src="../../media/images/icon.ico" />
+  <img class="titlebar-icon" src="../../media/images/icon.ico" draggable="false"/>
   <div class="titlebar-title">
-    {{ title }}
+    {{ title || '西瓜直播助手' }}
   </div>
   <div class="titlebar-actions">
     <i class="fa fa-window-minimize titlebar-action" @click="minimize" />

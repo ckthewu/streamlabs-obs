@@ -2,3 +2,4 @@ node-libuiohook/
 node_modules/
 webpack.config.js
 bin/
+bundles/
