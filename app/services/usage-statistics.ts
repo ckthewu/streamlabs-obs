@@ -20,7 +20,7 @@ interface IUsageApiData {
   data: object;
 }
 
-
+// 埋点装饰器
 export function track(event: TUsageEvent) {
   return (target: any, methodName: string, descriptor: PropertyDescriptor) => {
 
@@ -81,6 +81,7 @@ export class UsageStatisticsService extends Service {
    * @param event the event type to record
    * @param metadata arbitrary data to store with the event (must be serializable)
    */
+  // 埋点
   recordEvent(event: TUsageEvent, metadata: object = {}) {
     if (!this.isProduction) return;
 

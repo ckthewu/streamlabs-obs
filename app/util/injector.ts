@@ -4,6 +4,7 @@ import { ServicesManager } from '../services-manager';
  * inject service as getter
  * if serviceName is missed will try to use property name
  */
+// 为类注入service的单例
 export function Inject(serviceName?: string) {
   return function (target: Object, key: string) {
     Object.defineProperty(target, key, {

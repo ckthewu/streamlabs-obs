@@ -1,9 +1,11 @@
+// 管理vuex状态
 import Vue from 'vue';
 import { Store, Module } from 'vuex';
 import { Service } from './service';
 
 export * from './service';
 
+// 修饰需要自动commit的mutation
 export function mutation(options = { vuexSyncIgnore: false }) {
   return function (target: any, methodName: string, descriptor: PropertyDescriptor) {
     return registerMutation(target, methodName, descriptor, options);
@@ -11,6 +13,7 @@ export function mutation(options = { vuexSyncIgnore: false }) {
 
 }
 
+// 处理自动commit的mutations
 function registerMutation(
   target: any,
   methodName: string,
@@ -20,8 +23,10 @@ function registerMutation(
   const serviceName = target.constructor.name;
   const mutationName = `${serviceName}.${methodName}`;
 
+  // 原函数映射
   target.originalMethods = target.originalMethods || {};
   target.originalMethods[methodName] = target[methodName];
+  // 用于自动注册mutation
   target.mutations = target.mutations || {};
   target.mutations[mutationName] = function (localState: any, payload: {args: any, constructorArgs: any}) {
     const targetIsSingleton = !!target.constructor.instance;
@@ -55,9 +60,7 @@ function registerMutation(
   return Object.getOwnPropertyDescriptor(target, methodName);
 }
 
-/**
- * helps to integrate services with Vuex store
- */
+// 整合service到各自的store中
 export abstract class StatefulService<TState extends object> extends Service {
 
   private static store: Store<any>;
@@ -87,9 +90,7 @@ export abstract class StatefulService<TState extends object> extends Service {
 
 }
 
-/**
- * Returns an injectable Vuex module
- */
+// vuex module工厂，自动注册service上的mutations
 export function getModule(ModuleContainer: any): Module<any, any> {
   return {
     state: ModuleContainer.initialState ?
@@ -107,6 +108,7 @@ export function getModule(ModuleContainer: any): Module<any, any> {
  * - constructor arguments must be able to be serialized
  * - constructor must not have side effects
  */
+// 大致就是 处理一下继承且没有重写的函数
 export function ServiceHelper(): ClassDecorator {
   return function (target: any) {
     const original = target;

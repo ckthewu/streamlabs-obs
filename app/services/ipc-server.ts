@@ -14,12 +14,14 @@ const { ipcRenderer } = electron;
  * sever for handling API requests from IPC
  * using by child window
  */
+// 
 export class IpcServerService extends Service {
   servicesManager: ServicesManager = ServicesManager.instance;
   servicesEventsSubscription: Subscription;
   requestHandler: Function;
 
   listen() {
+    // 处理主进程调用service
     this.requestHandler = (event: Electron.Event, request: IJsonRpcRequest) => {
       const response: IJsonRpcResponse<
         any
@@ -29,6 +31,7 @@ export class IpcServerService extends Service {
     ipcRenderer.on('services-request', this.requestHandler);
     ipcRenderer.send('services-ready');
 
+    // 监听事件
     this.servicesEventsSubscription = this.servicesManager.serviceEvent.subscribe(
       event => this.sendEvent(event)
     );

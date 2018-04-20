@@ -33,7 +33,7 @@ import { AppService } from './services/app';
 // import { ShortcutsService } from './services/shortcuts';
 // import { CacheUploaderService } from './services/cache-uploader';
 // import { TcpServerService } from './services/tcp-server';
-// import { IpcServerService } from './services/ipc-server';
+import { IpcServerService } from './services/ipc-server';
 // import { UsageStatisticsService } from './services/usage-statistics';
 // import { StreamInfoService } from './services/stream-info';
 // import { StreamingService } from './services/streaming';
@@ -66,7 +66,7 @@ import { JsonrpcService } from './services/jsonrpc/jsonrpc';
 // import { PatchNotesService } from 'services/patch-notes';
 
 const { ipcRenderer } = electron;
-
+// service管理类
 export class ServicesManager extends Service {
   serviceEvent = new Subject<IJsonRpcResponse<IJsonRpcEvent>>();
 
@@ -115,7 +115,7 @@ export class ServicesManager extends Service {
     // ShortcutsService,
     // CacheUploaderService,
     // UsageStatisticsService,
-    // IpcServerService,
+    IpcServerService,
     // TcpServerService,
     // StreamInfoService,
     // StreamlabelsService,
@@ -133,7 +133,9 @@ export class ServicesManager extends Service {
     // PatchNotesService
   };
 
+  // 所有service的单例列表
   private instances: Dictionary<Service> = {};
+  // buffering控制 即记录mutations每次get instance后都会触发
   private mutationsBufferingEnabled = false;
   private bufferedMutations: IMutation[] = [];
 
@@ -186,11 +188,14 @@ export class ServicesManager extends Service {
     return this.services[serviceName];
   }
 
+  // 用于获取store相关service
   getStatefulServicesAndMutators(): Dictionary<typeof StatefulService> {
     const statefulServices = {};
     Object.keys(this.services).forEach(serviceName => {
       const ServiceClass = this.services[serviceName];
+      // 有初始化state的service
       const isStatefulService = ServiceClass['initialState'];
+      // 使用了mutations的service PS:@mutation 装饰器给server添加了这个原型对象
       const isMutator = ServiceClass.prototype.mutations;
       if (!isStatefulService && !isMutator) return;
       statefulServices[serviceName] = this.services[serviceName];
@@ -233,6 +238,7 @@ export class ServicesManager extends Service {
     this.bufferedMutations.push(mutation);
   }
 
+  // 处理服务请求
   executeServiceRequest(request: IJsonRpcRequest): IJsonRpcResponse<any> {
     let response: IJsonRpcResponse<any>;
     this.requestErrors = [];

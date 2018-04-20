@@ -1,9 +1,10 @@
-// This singleton class provides a renderer-space API
-// for spawning various child windows.
+// 使用一个单例类生产各子窗口
 
+// 页面组件
 import Main from '../components/windows/Main.vue';
 import Blank from '../components/windows/Blank.vue';
 import Barrage from '../components/windows/Barrage.vue';
+
 import { mutation, StatefulService } from './stateful-service';
 import electron from 'electron';
 
@@ -50,8 +51,7 @@ export class WindowsService extends StatefulService<IWindowsState> {
     },
   };
 
-  // This is a list of components that are registered to be
-  // top level components in new child windows.
+  // 页面级组件列表
   components = {
     Main,
     Blank,
@@ -65,11 +65,13 @@ export class WindowsService extends StatefulService<IWindowsState> {
     this.updateScaleFactor('main');
     this.updateScaleFactor('child');
     this.updateScaleFactor('float');
+    // 窗口移动可能导致切换设备
     this.getWindow('main').on('move', () => this.updateScaleFactor('main'));
     this.getWindow('child').on('move', () => this.updateScaleFactor('child'));
     this.getWindow('float').on('move', () => this.updateScaleFactor('float'));
   }
 
+  // 更新输出设备像素比
   private updateScaleFactor(windowId: TWindowId) {
     const window = this.getWindow(windowId);
     const bounds = window.getBounds();
@@ -77,12 +79,13 @@ export class WindowsService extends StatefulService<IWindowsState> {
     this.UPDATE_SCALE_FACTOR(windowId, currentDisplay.scaleFactor);
   }
 
+  // 弹出子窗口
   showWindow(options: Partial<IWindowOptions>) {
     ipcRenderer.send('window-showChildWindow', options);
   }
 
+  // 弹出浮层专用窗口
   showFloatWindow(options: Partial<IWindowOptions>) {
-    console.log('showFloatWindow');
     ipcRenderer.send('window-showFloatWindow', options);
   }
 

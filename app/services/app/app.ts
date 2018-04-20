@@ -11,7 +11,7 @@ import electron from 'electron';
 // import { VideoService } from '../video';
 // import { StreamInfoService } from '../stream-info';
 import { track } from '../usage-statistics';
-// import { IpcServerService } from '../ipc-server';
+import { IpcServerService } from '../ipc-server';
 // import { TcpServerService } from '../tcp-server';
 // import { StreamlabelsService } from '../streamlabels';
 // import { PerformanceMonitorService } from '../performance-monitor';
@@ -28,6 +28,7 @@ interface IAppState {
  * Performs operations that happen once at startup and shutdown. This service
  * mainly calls into other services to do the heavy lifting.
  */
+// 处理全局状态 （主要是loading）并且初始化一些service
 export class AppService extends StatefulService<IAppState> {
   // @Inject() onboardingService: OnboardingService;
   // @Inject() sceneCollectionsService: SceneCollectionsService;
@@ -49,7 +50,7 @@ export class AppService extends StatefulService<IAppState> {
   // @Inject() scenesService: ScenesService;
   // @Inject() videoService: VideoService;
   // @Inject() streamlabelsService: StreamlabelsService;
-  // @Inject() private ipcServerService: IpcServerService;
+  @Inject() private ipcServerService: IpcServerService;
   // @Inject() private tcpServerService: TcpServerService;
   // @Inject() private performanceMonitorService: PerformanceMonitorService;
   // @Inject() private fileManagerService: FileManagerService;
@@ -60,6 +61,7 @@ export class AppService extends StatefulService<IAppState> {
     // TODO: 修改结束loading位置
     setTimeout(() => {
       this.finishLoading();
+      this.ipcServerService.listen();
     }, 1000);
     // We want to start this as early as possible so that any
     // exceptions raised while loading the configuration are
@@ -94,7 +96,10 @@ export class AppService extends StatefulService<IAppState> {
   /**
    * the main process sends argv string here
    */
+  // 主进程透传参数
   setArgv(argv: string[]) {
+    console.log('setargv');
+    console.log(argv);
     this.SET_ARGV(argv);
   }
 
@@ -102,7 +107,7 @@ export class AppService extends StatefulService<IAppState> {
   private shutdownHandler() {
     this.START_LOADING();
 
-    // this.ipcServerService.stopListening();
+    this.ipcServerService.stopListening();
     // this.tcpServerService.stopListening();
 
     window.setTimeout(async () => {
