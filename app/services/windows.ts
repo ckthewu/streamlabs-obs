@@ -39,7 +39,7 @@ export class WindowsService extends StatefulService<IWindowsState> {
     main: {
       componentName: 'Main',
       scaleFactor: 1,
-      title: `Streamlabs OBS - Version: ${remote.process.env.SLOBS_VERSION}` // TODO:title
+      title: `西瓜直播助手 - 版本: ${remote.process.env.SLOBS_VERSION}` // TODO:title
     },
     child: {
       componentName: 'Blank',

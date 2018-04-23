@@ -81,9 +81,13 @@ const indexUrl = `file://${__dirname}/index.html`;
 
 
 function openDevTools() {
-  childWindow.webContents.openDevTools({ mode: 'undocked' });
-  floatWindow.webContents.openDevTools({ mode: 'undocked' });
-  mainWindow.webContents.openDevTools({ mode: 'undocked' });
+  try {
+    childWindow.webContents.openDevTools({ mode: 'undocked' });
+    floatWindow.webContents.openDevTools({ mode: 'undocked' });
+    mainWindow.webContents.openDevTools({ mode: 'undocked' });
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 // Lazy require OBS
@@ -149,8 +153,8 @@ function startApp() {
   // }
 
   const mainWindowState = windowStateKeeper({
-    defaultWidth: 1600,
-    defaultHeight: 1000
+    defaultWidth: 300,
+    defaultHeight: 600
   });
 
   mainWindow = new BrowserWindow({
@@ -160,6 +164,7 @@ function startApp() {
     height: mainWindowState.height,
     x: mainWindowState.x,
     y: mainWindowState.y,
+    backgroundColor: '#00FFFFFF',
     show: false,
     frame: false,
     title: '这是一个主窗口', // TODO: 修改标题
@@ -177,7 +182,6 @@ function startApp() {
     mainWindow.loadURL(indexUrl);
   }, isDevMode ? LOAD_DELAY : 0);
   mainWindow.on('close', e => {
-    console.log('window onclose');
     if (!shutdownStarted) {
       shutdownStarted = true;
       childWindow.destroy();
@@ -231,7 +235,6 @@ function startApp() {
   childWindow = new BrowserWindow({
     show: false,
     frame: false,
-    transparent: true,
   });
 
   const [windowWidth, windowHeight] = screenres.get();
